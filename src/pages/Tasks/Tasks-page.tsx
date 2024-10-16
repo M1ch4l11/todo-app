@@ -47,6 +47,7 @@ const TaskPage = () => {
       if (eventType === "create") createNewTask({ ...data, status: "active" });
       if (eventType === "update") updateTask(data, false);
     }
+    setFormVisible("");
   }
 
   return (
