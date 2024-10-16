@@ -1,25 +1,33 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { lazy, Suspense } from "react";
+import { TasksProvider } from "./providers/Tasks-provider";
+import { SnackbarProvider } from "notistack";
+
+const TasksPage = lazy(() => import("./pages/Tasks/Tasks-page"));
+const NotFoundPage = lazy(() => import("./pages/NotFound/NotFound-page"));
+
+function AppRoutes() {
+  return (
+    <>
+      <BrowserRouter basename="/">
+        <Suspense fallback={<div>Loading...</div>}>
+          <Routes>
+            <Route path="/" element={<TasksPage />} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </Suspense>
+      </BrowserRouter>
+    </>
+  );
+}
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <TasksProvider>
+      <SnackbarProvider maxSnack={3}>
+        <AppRoutes />
+      </SnackbarProvider>
+    </TasksProvider>
   );
 }
 
