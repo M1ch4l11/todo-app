@@ -24,6 +24,7 @@ const FormComponent: React.FC<FormProps> = ({
   eventType,
 }) => {
   const { getDefaultValue, formSchema } = useFormFacade();
+  const { tasksStore } = useTasksStore();
   const {
     register,
     handleSubmit,
@@ -41,13 +42,13 @@ const FormComponent: React.FC<FormProps> = ({
         id: data.id.toString(),
         title: data?.title ?? "",
         description: data?.description ?? "",
-        deadline: data?.deadline.toString() ?? "",
-        Tasks_CategoryId: data?.Tasks_CategoryId.toString() ?? "",
+        deadline:
+          data?.deadline.toString() ?? new Date().toISOString().slice(0, 16),
+        Tasks_CategoryId:
+          data?.Tasks_CategoryId.toString() ?? tasksStore.selectedCategory,
       });
     }
   }, [data, reset]);
-
-  const { tasksStore } = useTasksStore();
 
   const handleFormSubmit = (data: any) => {
     submit(data, eventType);
@@ -74,15 +75,16 @@ const FormComponent: React.FC<FormProps> = ({
         <TextField
           label="Title"
           variant="outlined"
-          {...register("title", { required: "Name is required" })}
+          {...register("title")}
           error={!!errors.title}
+          helperText={errors.title ? errors.title.message : ""}
         />
       ) : (
         <>
           <TextField
             label="Title"
             variant="outlined"
-            {...register("title", { required: "Title is required" })}
+            {...register("title")}
             error={!!errors.title}
             helperText={errors.title ? errors.title.message : ""}
           />
@@ -100,7 +102,7 @@ const FormComponent: React.FC<FormProps> = ({
             label=""
             type="datetime-local"
             variant="outlined"
-            {...register("deadline", { required: "Deadline is required" })}
+            {...register("deadline")}
             error={!!errors.deadline}
             helperText={errors.deadline ? errors.deadline.message : ""}
           />
@@ -114,9 +116,7 @@ const FormComponent: React.FC<FormProps> = ({
               label="Select Category"
               labelId="category-select-label"
               value={watch("Tasks_CategoryId")}
-              {...register("Tasks_CategoryId", {
-                required: "Category ID is required",
-              })}
+              {...register("Tasks_CategoryId")}
             >
               {tasksStore.categories.map((category) => (
                 <MenuItem key={category.id} value={category.id}>

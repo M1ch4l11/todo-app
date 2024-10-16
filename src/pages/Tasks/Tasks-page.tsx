@@ -60,14 +60,14 @@ const TaskPage = () => {
         </Button>
       </NavigationWrapper>
       <FilterContainer>
-        <FilterComponent />
-        <SearchBar />
         <IconButton
-          sx={{ height: "fit-content" }}
+          sx={{ height: "fit-content", backgroundColor: "antiquewhite" }}
           onClick={() => showForm("Task", "create")}
         >
           <AddIcon />
         </IconButton>
+        <FilterComponent />
+        <SearchBar />
       </FilterContainer>
       {tasksStore && (
         <div style={{ height: "68vh", overflowY: "scroll" }}>
