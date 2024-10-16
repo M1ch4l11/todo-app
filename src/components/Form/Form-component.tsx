@@ -13,8 +13,9 @@ import {
 import { useEffect } from "react";
 import { useTasksStore } from "../../providers/Tasks-provider";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FormProps, formSchema } from "../../models/Form";
+import { FormProps } from "../../models/Form";
 import { Textarea } from "@mui/joy";
+import { useFormFacade } from "./Form-facade-service";
 
 const FormComponent: React.FC<FormProps> = ({
   type,
@@ -22,6 +23,7 @@ const FormComponent: React.FC<FormProps> = ({
   data,
   eventType,
 }) => {
+  const { getDefaultValue, formSchema } = useFormFacade();
   const {
     register,
     handleSubmit,
@@ -29,18 +31,12 @@ const FormComponent: React.FC<FormProps> = ({
     watch,
     formState: { errors },
   } = useForm({
-    defaultValues: {
-      id: "",
-      title: "",
-      description: "",
-      deadline: "",
-      Tasks_CategoryId: "",
-    },
-    resolver: zodResolver(formSchema),
+    defaultValues: getDefaultValue(type),
+    resolver: zodResolver(formSchema[type]),
   });
 
   useEffect(() => {
-    if (data) {
+    if (data && type === "Task") {
       reset({
         id: data.id.toString(),
         title: data?.title ?? "",
@@ -74,7 +70,7 @@ const FormComponent: React.FC<FormProps> = ({
         {type}
       </Typography>
 
-      {type === "category" ? (
+      {type === "Category" ? (
         <TextField
           label="Title"
           variant="outlined"
