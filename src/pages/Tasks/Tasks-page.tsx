@@ -20,9 +20,10 @@ import {
 } from "./Tasks";
 import { Task } from "../../models/Task";
 import TaskComponent from "../../components/Task/Task-component";
+import { FormType } from "../../models/Form";
 
 const TaskPage = () => {
-  const [formType, setFormVisible] = useState("");
+  const [formType, setFormVisible] = useState<FormType | "">("");
   const [eventType, setEventType] = useState("");
   const [Task, setTask] = useState<Task | undefined>(undefined);
 
@@ -35,14 +36,14 @@ const TaskPage = () => {
   } = useTasksFacade();
   const { tasksStore } = useTasksStore();
 
-  function showForm(type: string, newEventType: string, Task?: Task): void {
+  function showForm(type: FormType, newEventType: string, Task?: Task): void {
     setFormVisible(type);
     setEventType(newEventType);
     setTask(Task ?? undefined);
   }
 
   function submitEvent(data: any, eventType: string): void {
-    if (formType === "category") addNewCategory(data.title);
+    if (formType === "Category") addNewCategory(data.title);
     else if (formType === "Task") {
       if (eventType === "create") createNewTask({ ...data, status: "active" });
       if (eventType === "update") updateTask(data, false);
@@ -54,19 +55,19 @@ const TaskPage = () => {
     <>
       <NavigationWrapper>
         <NavCategories deleteCategory={(id) => deleteCategory(id)} />
-        <Button onClick={() => showForm("category", "create")}>
+        <Button onClick={() => showForm("Category", "create")}>
           Add task List
         </Button>
       </NavigationWrapper>
       <FilterContainer>
-        <FilterComponent />
-        <SearchBar />
         <IconButton
-          sx={{ height: "fit-content" }}
+          sx={{ height: "fit-content", backgroundColor: "antiquewhite" }}
           onClick={() => showForm("Task", "create")}
         >
           <AddIcon />
         </IconButton>
+        <FilterComponent />
+        <SearchBar />
       </FilterContainer>
       {tasksStore && (
         <div style={{ height: "68vh", overflowY: "scroll" }}>
@@ -116,7 +117,7 @@ const TaskPage = () => {
         <Fade in={!!formType}>
           <ModalWrapper>
             <FormComponent
-              type={formType}
+              type={!!formType ? formType : "Category"}
               data={Task}
               eventType={eventType}
               submit={(data, eventType) => submitEvent(data, eventType)}

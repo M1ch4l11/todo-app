@@ -13,8 +13,9 @@ import {
 import { useEffect } from "react";
 import { useTasksStore } from "../../providers/Tasks-provider";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FormProps, formSchema } from "../../models/Form";
+import { FormProps } from "../../models/Form";
 import { Textarea } from "@mui/joy";
+import { useFormFacade } from "./Form-facade-service";
 
 const FormComponent: React.FC<FormProps> = ({
   type,
@@ -22,6 +23,8 @@ const FormComponent: React.FC<FormProps> = ({
   data,
   eventType,
 }) => {
+  const { getDefaultValue, formSchema } = useFormFacade();
+  const { tasksStore } = useTasksStore();
   const {
     register,
     handleSubmit,
@@ -29,29 +32,23 @@ const FormComponent: React.FC<FormProps> = ({
     watch,
     formState: { errors },
   } = useForm({
-    defaultValues: {
-      id: "",
-      title: "",
-      description: "",
-      deadline: "",
-      Tasks_CategoryId: "",
-    },
-    resolver: zodResolver(formSchema),
+    defaultValues: getDefaultValue(type),
+    resolver: zodResolver(formSchema[type]),
   });
 
   useEffect(() => {
-    if (data) {
+    if (data && type === "Task") {
       reset({
         id: data.id.toString(),
         title: data?.title ?? "",
         description: data?.description ?? "",
-        deadline: data?.deadline.toString() ?? "",
-        Tasks_CategoryId: data?.Tasks_CategoryId.toString() ?? "",
+        deadline:
+          data?.deadline.toString() ?? new Date().toISOString().slice(0, 16),
+        Tasks_CategoryId:
+          data?.Tasks_CategoryId.toString() ?? tasksStore.selectedCategory,
       });
     }
   }, [data, reset]);
-
-  const { tasksStore } = useTasksStore();
 
   const handleFormSubmit = (data: any) => {
     submit(data, eventType);
@@ -74,19 +71,20 @@ const FormComponent: React.FC<FormProps> = ({
         {type}
       </Typography>
 
-      {type === "category" ? (
+      {type === "Category" ? (
         <TextField
           label="Title"
           variant="outlined"
-          {...register("title", { required: "Name is required" })}
+          {...register("title")}
           error={!!errors.title}
+          helperText={errors.title ? errors.title.message : ""}
         />
       ) : (
         <>
           <TextField
             label="Title"
             variant="outlined"
-            {...register("title", { required: "Title is required" })}
+            {...register("title")}
             error={!!errors.title}
             helperText={errors.title ? errors.title.message : ""}
           />
@@ -104,7 +102,7 @@ const FormComponent: React.FC<FormProps> = ({
             label=""
             type="datetime-local"
             variant="outlined"
-            {...register("deadline", { required: "Deadline is required" })}
+            {...register("deadline")}
             error={!!errors.deadline}
             helperText={errors.deadline ? errors.deadline.message : ""}
           />
@@ -118,9 +116,7 @@ const FormComponent: React.FC<FormProps> = ({
               label="Select Category"
               labelId="category-select-label"
               value={watch("Tasks_CategoryId")}
-              {...register("Tasks_CategoryId", {
-                required: "Category ID is required",
-              })}
+              {...register("Tasks_CategoryId")}
             >
               {tasksStore.categories.map((category) => (
                 <MenuItem key={category.id} value={category.id}>
